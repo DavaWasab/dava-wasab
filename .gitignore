@@ -23,3 +23,5 @@ desktop.ini
 # Build tools and production folders
 production/
 production_advanced/
+build-tools/
+docs/
