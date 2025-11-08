@@ -9,7 +9,7 @@ Professional Minecraft designer specializing in custom skins, 3D models, and low
 ## Services
 
 ### Custom Skins
-- **Price:** 150 UAH / 300 RUB / $5 USD
+- **Price:** 155 UAH / 300 RUB / $5 USD
 - Fixed price for any skin type (Slim, Wide, Classic)
 - High-resolution PNG files
 - Fast delivery (24-48 hours)
@@ -41,7 +41,7 @@ All skin designs are showcased in the gallery section. Each piece represents cus
 ## Tech Stack
 
 - HTML5
-- CSS3 (iOS/Win12 inspired design)
+- CSS3 
 - Vanilla JavaScript
 - Responsive design
 

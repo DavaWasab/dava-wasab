@@ -27,18 +27,86 @@ function redirect(key) {
     return false;
 }
 
-// Log available redirects on load
-try {
-    console.log('%c📋 Available Redirects:', 'color: #E0FF00; font-size: 14px; font-weight: bold;');
-    Object.entries(redirectLinks).forEach(([key, url]) => {
-        console.log(`%c  ${key}: %c${url}`, 'color: #F0FFD0;', 'color: #87C93D;');
+// Redirect system is available but not logged to console
+// Use: redirect("key"), listRedirects(), getRedirect("key")
+
+// ==========================================
+// COPY TO CLIPBOARD FUNCTION
+// ==========================================
+function copyToClipboard(text, event) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    navigator.clipboard.writeText(text).then(() => {
+        // Show notification
+        const notification = document.createElement('div');
+        notification.className = 'copy-notification';
+        notification.textContent = 'Copied: ' + text;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 300);
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy:', err);
     });
-} catch (e) {
-    // Suppress extension errors
 }
+
+// Make function globally accessible
+window.copyToClipboard = copyToClipboard;
+
+// ==========================================
+// PAYMENT CARDS CURRENCY DISPLAY
+// ==========================================
+function showCurrencies(cardType) {
+    const currenciesElement = document.getElementById(`${cardType}-currencies`);
+    if (currenciesElement) {
+        currenciesElement.classList.add('show');
+    }
+}
+
+function hideCurrencies() {
+    const allCurrencies = document.querySelectorAll('.card-currencies');
+    allCurrencies.forEach(el => {
+        el.classList.remove('show');
+    });
+}
+
+// Make functions globally accessible
+window.showCurrencies = showCurrencies;
+window.hideCurrencies = hideCurrencies;
 
 // Make redirect function globally accessible
 window.redirect = redirect;
+
+// Function to list all redirects
+window.listRedirects = function() {
+    try {
+        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #E0FF00;');
+        console.log('%c✨ Minecraft Designer • Own Site Portfolio', 'color: #E0FF00; font-size: 14px; font-weight: bold;');
+        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #E0FF00;');
+        Object.entries(redirectLinks).forEach(([key, url]) => {
+            console.log(`%c  ${key}`, 'color: #E0FF00; font-weight: bold;');
+            console.log(`%c    ${url}`, 'color: #87C93D;');
+        });
+        console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #E0FF00;');
+    } catch (e) {
+        // Suppress extension errors
+        console.log('Redirects:', redirectLinks);
+    }
+};
+
+// Function to get specific redirect URL
+window.getRedirect = function(key) {
+    return redirectLinks[key] || null;
+};
 
 // ==========================================
 // ANIMATED PARTICLES BACKGROUND
@@ -329,25 +397,35 @@ document.head.appendChild(style);
 // ==========================================
 // LOADING SCREEN
 // ==========================================
-window.addEventListener('load', () => {
+// Hide loader as soon as DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
     const loader = document.getElementById('loader');
     if (loader) {
-        setTimeout(() => {
-            loader.style.opacity = '0';
-            setTimeout(() => {
-                loader.style.display = 'none';
-            }, 500);
-        }, 800);
+        // Check if all critical resources are loaded
+        if (document.readyState === 'complete') {
+            hideLoader(loader);
+        } else {
+            window.addEventListener('load', () => hideLoader(loader));
+        }
     }
 });
+
+function hideLoader(loader) {
+    // Quick fade out
+    setTimeout(() => {
+        loader.style.opacity = '0';
+        setTimeout(() => {
+            loader.style.display = 'none';
+        }, 300);
+    }, 200); // Minimal delay for smooth appearance
+}
 
 // ==========================================
 // CONSOLE BRANDING
 // ==========================================
-// Wrap in try-catch to prevent extension errors
 try {
     console.log('%c DAVA_WASAB ', 'background: #E0FF00; color: #01000D; font-size: 20px; font-weight: bold; padding: 10px 20px;');
-    console.log('%c Minecraft Designer • Premium Portfolio ', 'color: #F0FFD0; font-size: 14px; padding: 5px 0;');
+    console.log('%c Minecraft Designer • Own Site Portfolio ', 'color: #F0FFD0; font-size: 14px; padding: 5px 0;');
     console.log('%c DM me in Discord: Dava_Wasab ', 'color: #E0FF00; font-size: 12px;');
     console.log('%c or with link: https://discord.com/users/1047829202705059840 ', 'color: #87C93D; font-size: 12px;');
 } catch (e) {
@@ -466,7 +544,22 @@ function initVisitorCounter() {
     // Get stored data
     let visitorData = localStorage.getItem('visitorData');
     if (visitorData) {
-        visitorData = JSON.parse(visitorData);
+        try {
+            visitorData = JSON.parse(visitorData);
+            // Ensure arrays exist
+            if (!Array.isArray(visitorData.todayVisits)) {
+                visitorData.todayVisits = [];
+            }
+            if (!Array.isArray(visitorData.activeSessions)) {
+                visitorData.activeSessions = [];
+            }
+        } catch (e) {
+            visitorData = {
+                date: today,
+                todayVisits: [],
+                activeSessions: []
+            };
+        }
     } else {
         visitorData = {
             date: today,
@@ -514,17 +607,20 @@ function initVisitorCounter() {
     const todayCount = document.getElementById('todayCount');
     const onlineCount = document.getElementById('onlineCount');
     
+    // Calculate counts
+    const onlineTotal = Math.max(1, visitorData.activeSessions.length);
+    // Today always > Online (at least +1 more than online)
+    const todayTotal = Math.max(onlineTotal + 1, visitorData.todayVisits.length);
+    
     if (todayCount) {
-        // Minimum 1 visitor (current user)
-        const todayTotal = Math.max(1, visitorData.todayVisits.length);
         animateCounter(todayCount, 0, todayTotal, 1000);
     }
     
     if (onlineCount) {
-        // Minimum 1 online (current user)
-        const onlineTotal = Math.max(1, visitorData.activeSessions.length);
         animateCounter(onlineCount, 0, onlineTotal, 800);
     }
+    
+    // Visitor stats (silent mode for production)
     
     // Update active sessions every 30 seconds
     setInterval(() => {
@@ -543,12 +639,21 @@ function initVisitorCounter() {
             
             localStorage.setItem('visitorData', JSON.stringify(data));
             
-            // Update online count
+            // Update counts
+            const newOnlineTotal = Math.max(1, data.activeSessions.length);
+            const newTodayTotal = Math.max(newOnlineTotal + 1, data.todayVisits.length);
+            
             if (onlineCount) {
-                const currentCount = parseInt(onlineCount.textContent);
-                const newOnlineTotal = Math.max(1, data.activeSessions.length);
-                if (currentCount !== newOnlineTotal) {
-                    animateCounter(onlineCount, currentCount, newOnlineTotal, 500);
+                const currentOnline = parseInt(onlineCount.textContent);
+                if (currentOnline !== newOnlineTotal) {
+                    animateCounter(onlineCount, currentOnline, newOnlineTotal, 500);
+                }
+            }
+            
+            if (todayCount) {
+                const currentToday = parseInt(todayCount.textContent);
+                if (currentToday !== newTodayTotal) {
+                    animateCounter(todayCount, currentToday, newTodayTotal, 500);
                 }
             }
         }
@@ -575,13 +680,6 @@ function animateCounter(element, start, end, duration) {
 // INITIALIZE
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    try {
-        console.log('✨ Portfolio Loaded');
-        console.log('🖼️ Gallery System Active');
-    } catch (e) {
-        // Suppress extension errors
-    }
-    
     // Update age on load
     updateAge();
     

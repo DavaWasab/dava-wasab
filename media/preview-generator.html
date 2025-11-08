@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Unbounded:wght@900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 1200px;
+            height: 630px;
+            background: linear-gradient(135deg, #01000D 0%, #0A0A1E 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Particles background */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(224, 255, 0, 0.3);
+            border-radius: 50%;
+        }
+        
+        .content {
+            text-align: center;
+            z-index: 10;
+            padding: 60px;
+        }
+        
+        .logo {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 96px;
+            font-weight: 900;
+            color: #E0FF00;
+            letter-spacing: -2px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 40px rgba(224, 255, 0, 0.5);
+        }
+        
+        .tagline {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 36px;
+            font-weight: 700;
+            color: #F0FFD0;
+            margin-bottom: 30px;
+        }
+        
+        .features {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+        
+        .feature {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #87C93D;
+            padding: 12px 24px;
+            background: rgba(224, 255, 0, 0.1);
+            border: 2px solid rgba(224, 255, 0, 0.3);
+            border-radius: 12px;
+        }
+        
+        .glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(224, 255, 0, 0.15), transparent);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="glow"></div>
+    
+    <!-- Particles -->
+    <script>
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 3 + 's';
+            document.body.appendChild(particle);
+        }
+    </script>
+    
+    <div class="content">
+        <div class="logo">DAVA_WASAB</div>
+        <div class="tagline">Minecraft Designer</div>
+        <div class="features">
+            <div class="feature">Custom Skins</div>
+            <div class="feature">3D Models</div>
+            <div class="feature">Premium Quality</div>
+        </div>
+    </div>
+</body>
+</html>
