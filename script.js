@@ -2,6 +2,45 @@
 // Clean animations without cursor trail
 
 // ==========================================
+// REDIRECT SYSTEM
+// ==========================================
+const redirectLinks = {
+    'telegram-channel': 'https://t.me/DavasMueslis',
+    'telegram-live': 'https://t.me/Dava_Wasab',
+    'discord-server': 'https://discord.com/invite/e4qS8pr2vz',
+    'discord-dm': 'https://discord.com/users/1047829202705059840',
+    'bluesky': 'https://bsky.app/profile/dava-wasab.bsky.social',
+    'twitter': 'https://x.com/Dava_Wasab_Off'
+};
+
+function redirect(key) {
+    const url = redirectLinks[key];
+    if (url) {
+        try {
+            console.log(`%c🔗 Redirecting to: ${key}`, 'color: #E0FF00; font-size: 12px;');
+            console.log(`%c→ ${url}`, 'color: #87C93D; font-size: 11px;');
+        } catch (e) {
+            // Suppress extension errors
+        }
+        window.open(url, '_blank');
+    }
+    return false;
+}
+
+// Log available redirects on load
+try {
+    console.log('%c📋 Available Redirects:', 'color: #E0FF00; font-size: 14px; font-weight: bold;');
+    Object.entries(redirectLinks).forEach(([key, url]) => {
+        console.log(`%c  ${key}: %c${url}`, 'color: #F0FFD0;', 'color: #87C93D;');
+    });
+} catch (e) {
+    // Suppress extension errors
+}
+
+// Make redirect function globally accessible
+window.redirect = redirect;
+
+// ==========================================
 // ANIMATED PARTICLES BACKGROUND
 // ==========================================
 function createParticles() {
@@ -37,7 +76,7 @@ function createParticles() {
 createParticles();
 
 // ==========================================
-// SMOOTH SCROLL
+// SMOOTH SCROLL FOR ANCHOR LINKS
 // ==========================================
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
@@ -51,6 +90,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             const navbarHeight = document.querySelector('.navbar').offsetHeight;
             const targetPosition = targetElement.offsetTop - navbarHeight - 20;
             
+            // Smooth scroll to target
             window.scrollTo({
                 top: targetPosition,
                 behavior: 'smooth'
@@ -287,23 +327,32 @@ style.textContent = `
 document.head.appendChild(style);
 
 // ==========================================
-// LOADING ANIMATION
+// LOADING SCREEN
 // ==========================================
 window.addEventListener('load', () => {
-    document.body.style.opacity = '0';
-    setTimeout(() => {
-        document.body.style.transition = 'opacity 0.5s ease';
-        document.body.style.opacity = '1';
-    }, 50);
+    const loader = document.getElementById('loader');
+    if (loader) {
+        setTimeout(() => {
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 500);
+        }, 800);
+    }
 });
 
 // ==========================================
 // CONSOLE BRANDING
 // ==========================================
-console.log('%c DAVA_WASAB ', 'background: #E0FF00; color: #01000D; font-size: 20px; font-weight: bold; padding: 10px 20px;');
-console.log('%c Minecraft Designer • Premium Portfolio ', 'color: #F0FFD0; font-size: 14px; padding: 5px 0;');
-console.log('%c DM me in Discord: Dava_Wasab ', 'color: #E0FF00; font-size: 12px;');
-console.log('%c or with link: https://discord.com/users/1047829202705059840 ', 'color: #87C93D; font-size: 12px;');
+// Wrap in try-catch to prevent extension errors
+try {
+    console.log('%c DAVA_WASAB ', 'background: #E0FF00; color: #01000D; font-size: 20px; font-weight: bold; padding: 10px 20px;');
+    console.log('%c Minecraft Designer • Premium Portfolio ', 'color: #F0FFD0; font-size: 14px; padding: 5px 0;');
+    console.log('%c DM me in Discord: Dava_Wasab ', 'color: #E0FF00; font-size: 12px;');
+    console.log('%c or with link: https://discord.com/users/1047829202705059840 ', 'color: #87C93D; font-size: 12px;');
+} catch (e) {
+    // Suppress extension errors
+}
 
 // ==========================================
 // GALLERY TABS
@@ -408,11 +457,130 @@ function updateClock() {
 }
 
 // ==========================================
+// VISITOR COUNTER
+// ==========================================
+function initVisitorCounter() {
+    const today = new Date().toDateString();
+    const now = Date.now();
+    
+    // Get stored data
+    let visitorData = localStorage.getItem('visitorData');
+    if (visitorData) {
+        visitorData = JSON.parse(visitorData);
+    } else {
+        visitorData = {
+            date: today,
+            todayVisits: [],
+            activeSessions: []
+        };
+    }
+    
+    // Reset counter if new day
+    if (visitorData.date !== today) {
+        visitorData = {
+            date: today,
+            todayVisits: [],
+            activeSessions: []
+        };
+    }
+    
+    // Generate unique visitor ID (persists across sessions)
+    let visitorId = localStorage.getItem('visitorId');
+    if (!visitorId) {
+        visitorId = 'v_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('visitorId', visitorId);
+    }
+    
+    // Check if this visitor already visited today
+    if (!visitorData.todayVisits.includes(visitorId)) {
+        visitorData.todayVisits.push(visitorId);
+    }
+    
+    // Clean up old active sessions (older than 5 minutes)
+    visitorData.activeSessions = visitorData.activeSessions.filter(s => now - s.time < 300000);
+    
+    // Add or update current session
+    const existingSession = visitorData.activeSessions.findIndex(s => s.id === visitorId);
+    if (existingSession !== -1) {
+        visitorData.activeSessions[existingSession].time = now;
+    } else {
+        visitorData.activeSessions.push({ id: visitorId, time: now });
+    }
+    
+    // Save data
+    localStorage.setItem('visitorData', JSON.stringify(visitorData));
+    
+    // Update display
+    const todayCount = document.getElementById('todayCount');
+    const onlineCount = document.getElementById('onlineCount');
+    
+    if (todayCount) {
+        // Minimum 1 visitor (current user)
+        const todayTotal = Math.max(1, visitorData.todayVisits.length);
+        animateCounter(todayCount, 0, todayTotal, 1000);
+    }
+    
+    if (onlineCount) {
+        // Minimum 1 online (current user)
+        const onlineTotal = Math.max(1, visitorData.activeSessions.length);
+        animateCounter(onlineCount, 0, onlineTotal, 800);
+    }
+    
+    // Update active sessions every 30 seconds
+    setInterval(() => {
+        const currentTime = Date.now();
+        let data = JSON.parse(localStorage.getItem('visitorData'));
+        
+        if (data) {
+            // Clean up old sessions
+            data.activeSessions = data.activeSessions.filter(s => currentTime - s.time < 300000);
+            
+            // Update current session
+            const session = data.activeSessions.find(s => s.id === visitorId);
+            if (session) {
+                session.time = currentTime;
+            }
+            
+            localStorage.setItem('visitorData', JSON.stringify(data));
+            
+            // Update online count
+            if (onlineCount) {
+                const currentCount = parseInt(onlineCount.textContent);
+                const newOnlineTotal = Math.max(1, data.activeSessions.length);
+                if (currentCount !== newOnlineTotal) {
+                    animateCounter(onlineCount, currentCount, newOnlineTotal, 500);
+                }
+            }
+        }
+    }, 30000); // Every 30 seconds
+}
+
+function animateCounter(element, start, end, duration) {
+    const range = end - start;
+    const increment = range / (duration / 16);
+    let current = start;
+    
+    const timer = setInterval(() => {
+        current += increment;
+        if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+            element.textContent = end;
+            clearInterval(timer);
+        } else {
+            element.textContent = Math.floor(current);
+        }
+    }, 16);
+}
+
+// ==========================================
 // INITIALIZE
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('✨ Portfolio Loaded');
-    console.log('🖼️ Gallery System Active');
+    try {
+        console.log('✨ Portfolio Loaded');
+        console.log('🖼️ Gallery System Active');
+    } catch (e) {
+        // Suppress extension errors
+    }
     
     // Update age on load
     updateAge();
@@ -430,4 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Start clock
     updateClock();
     setInterval(updateClock, 1000); // Update every second
+    
+    // Initialize visitor counter
+    initVisitorCounter();
 });
