@@ -21,7 +21,6 @@ desktop.ini
 *.bak
 
 # Build tools and production folders
-build-tools/
 production/
 production_advanced/
 OBFUSCATION_GUIDE.md
