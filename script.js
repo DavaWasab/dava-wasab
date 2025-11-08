@@ -141,8 +141,6 @@ function createParticles() {
     }
 }
 
-createParticles();
-
 // ==========================================
 // SMOOTH SCROLL FOR ANCHOR LINKS
 // ==========================================
@@ -677,9 +675,37 @@ function animateCounter(element, start, end, duration) {
 }
 
 // ==========================================
+// RIPPLE EFFECT ON WIDGETS
+// ==========================================
+document.querySelectorAll('.widget').forEach(widget => {
+    widget.addEventListener('click', function(e) {
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        
+        const rect = this.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        ripple.style.left = x + 'px';
+        ripple.style.top = y + 'px';
+        ripple.style.width = '20px';
+        ripple.style.height = '20px';
+        
+        this.appendChild(ripple);
+        
+        setTimeout(() => {
+            ripple.remove();
+        }, 600);
+    });
+});
+
+// ==========================================
 // INITIALIZE
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
+    // Create particles background
+    createParticles();
+    
     // Update age on load
     updateAge();
     
@@ -699,4 +725,27 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Initialize visitor counter
     initVisitorCounter();
+    
+    // Initialize ripple effect on widgets
+    document.querySelectorAll('.widget').forEach(widget => {
+        widget.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple';
+            
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.style.width = '20px';
+            ripple.style.height = '20px';
+            
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
 });
